@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Объединитель файлов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+        #drop-area.highlight {
+            border-color: purple;
+        }
+        #file-list {
+            margin-top: 20px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Объединитель файлов</h1>
+    <div id="drop-area">
+        <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
+        <input type="file" id="fileInput" multiple webkitdirectory directory hidden>
+    </div>
+    <div id="file-list"></div>
+    <button id="combineButton">Объединить файлы</button>
+
+    <script>
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('file-list');
+        const combineButton = document.getElementById('combineButton');
+        let files = [];
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFiles, false);
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        async function handleDrop(e) {
+            const items = e.dataTransfer.items;
+            await handleItems(items);
+        }
+
+        async function handleFiles() {
+            await handleItems(fileInput.files);
+        }
+
+        async function handleItems(items) {
+            files = [];
+            fileList.innerHTML = '';
+            for (const item of items) {
+                if (item.kind === 'file' || item instanceof File) {
+                    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : item;
+                    await traverseFileTree(entry);
+                }
+            }
+        }
+
+        async function traverseFileTree(item) {
+            if (item.isFile) {
+                const file = await new Promise((resolve) => item.file(resolve));
+                console.log(file, file.type);
+                //if (file.type === 'text/plain') {
+                    files.push(file);
+                    displayFile(file);
+                //}
+            } else if (item.isDirectory) {
+                const dirReader = item.createReader();
+                const entries = await new Promise((resolve) => {
+                    dirReader.readEntries(resolve);
+                });
+                for (const entry of entries) {
+                    await traverseFileTree(entry);
+                }
+            }
+        }
+
+        function displayFile(file) {
+            const li = document.createElement('li');
+            li.textContent = file.name;
+            fileList.appendChild(li);
+        }
+
+        combineButton.addEventListener('click', combineFiles);
+
+        async function combineFiles() {
+            if (files.length === 0) {
+                alert('Пожалуйста, загрузите файлы перед объединением.');
+                return;
+            }
+
+            let combinedContent = '';
+
+            for (const file of files) {
+                const content = await readFile(file);
+                combinedContent += `${file.name}:\n${content}\n\n\n`;
+            }
+
+            downloadCombinedFile(combinedContent);
+        }
+
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
+        function downloadCombinedFile(content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'combined_files.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
