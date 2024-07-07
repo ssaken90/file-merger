@@ -96,28 +96,28 @@
             }
         }
 
-        async function traverseFileTree(item) {
+        async function traverseFileTree(item, path = '') {
             if (item.isFile) {
                 const file = await new Promise((resolve) => item.file(resolve));
-                console.log(file, file.type);
-                //if (file.type === 'text/plain') {
-                    files.push(file);
-                    displayFile(file);
-                //}
+                if (file.size <= 1024 * 1024) { // Проверка на размер файла (не больше 1 МБ)
+                    const fullPath = path + file.name;
+                    files.push({ file, path: fullPath });
+                    displayFile(fullPath);
+                }
             } else if (item.isDirectory) {
                 const dirReader = item.createReader();
                 const entries = await new Promise((resolve) => {
                     dirReader.readEntries(resolve);
                 });
                 for (const entry of entries) {
-                    await traverseFileTree(entry);
+                    await traverseFileTree(entry, path + item.name + '/');
                 }
             }
         }
 
-        function displayFile(file) {
+        function displayFile(filePath) {
             const li = document.createElement('li');
-            li.textContent = file.name;
+            li.textContent = filePath;
             fileList.appendChild(li);
         }
 
@@ -130,13 +130,29 @@
             }
 
             let combinedContent = '';
+            let fileNames = [];
 
-            for (const file of files) {
+            for (const { file, path } of files) {
                 const content = await readFile(file);
-                combinedContent += `${file.name}:\n${content}\n\n\n`;
+                combinedContent += `${path};\n${content}\n\n\n`;
+                fileNames.push(file.name.split('.').slice(0, -1).join('.'));
             }
 
-            downloadCombinedFile(combinedContent);
+            const outputFileName = generateOutputFileName(fileNames);
+            downloadCombinedFile(combinedContent, outputFileName);
+        }
+
+        function generateOutputFileName(fileNames) {
+            const baseName = 'combined_files';
+            const namesList = fileNames.join('_');
+            let fullName = `${baseName}_${namesList}`;
+            
+            // Ограничение длины имени файла (например, до 200 символов)
+            if (fullName.length > 200) {
+                fullName = fullName.substring(0, 196) + '...';
+            }
+            
+            return fullName + '.txt';
         }
 
         function readFile(file) {
@@ -148,12 +164,12 @@
             });
         }
 
-        function downloadCombinedFile(content) {
+        function downloadCombinedFile(content, fileName) {
             const blob = new Blob([content], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'combined_files.txt';
+            a.download = fileName;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
