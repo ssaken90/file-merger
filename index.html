@@ -35,7 +35,7 @@
     <h1>Объединитель файлов</h1>
     <div id="drop-area">
         <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
-        <input type="file" id="fileInput" multiple webkitdirectory directory hidden>
+        <input type="file" id="fileInput" multiple hidden>
     </div>
     <div id="file-list"></div>
     <button id="combineButton">Объединить файлы</button>
@@ -81,19 +81,19 @@
             await handleItems(items);
         }
 
-        async function handleFiles() {
-            await handleItems(fileInput.files);
+        async function handleFiles(e) {
+            const items = e.target.files;
+            await handleItems(items);
         }
 
         async function handleItems(items) {
-            files = [];
-            fileList.innerHTML = '';
             for (const item of items) {
                 if (item.kind === 'file' || item instanceof File) {
                     const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : item;
                     await traverseFileTree(entry);
                 }
             }
+            updateFileList();
         }
 
         async function traverseFileTree(item, path = '') {
@@ -102,7 +102,6 @@
                 if (file.size <= 1024 * 1024) { // Проверка на размер файла (не больше 1 МБ)
                     const fullPath = path + file.name;
                     files.push({ file, path: fullPath });
-                    displayFile(fullPath);
                 }
             } else if (item.isDirectory) {
                 const dirReader = item.createReader();
@@ -115,10 +114,13 @@
             }
         }
 
-        function displayFile(filePath) {
-            const li = document.createElement('li');
-            li.textContent = filePath;
-            fileList.appendChild(li);
+        function updateFileList() {
+            fileList.innerHTML = '';
+            files.forEach(({ path }) => {
+                const li = document.createElement('li');
+                li.textContent = path;
+                fileList.appendChild(li);
+            });
         }
 
         combineButton.addEventListener('click', combineFiles);
