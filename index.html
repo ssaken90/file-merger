@@ -35,7 +35,7 @@
     <h1>Объединитель файлов</h1>
     <div id="drop-area">
         <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
-        <input type="file" id="fileInput" multiple hidden>
+        <input type="file" id="fileInput" multiple webkitdirectory hidden>
     </div>
     <div id="file-list"></div>
     <button id="combineButton">Объединить файлы</button>
@@ -78,19 +78,23 @@
 
         async function handleDrop(e) {
             const items = e.dataTransfer.items;
-            await handleItems(items);
+            for (const item of items) {
+                if (item.kind === 'file') {
+                    const entry = item.webkitGetAsEntry();
+                    if (entry) {
+                        await traverseFileTree(entry);
+                    }
+                }
+            }
+            updateFileList();
         }
 
         async function handleFiles(e) {
-            const items = e.target.files;
-            await handleItems(items);
-        }
-
-        async function handleItems(items) {
-            for (const item of items) {
-                if (item.kind === 'file' || item instanceof File) {
-                    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : item;
-                    await traverseFileTree(entry);
+            const selectedFiles = e.target.files;
+            for (const file of selectedFiles) {
+                const relativePath = file.webkitRelativePath || file.name;
+                if (file.size <= 1024 * 1024) {
+                    files.push({ file, path: relativePath });
                 }
             }
             updateFileList();
@@ -99,7 +103,7 @@
         async function traverseFileTree(item, path = '') {
             if (item.isFile) {
                 const file = await new Promise((resolve) => item.file(resolve));
-                if (file.size <= 1024 * 1024) { // Проверка на размер файла (не больше 1 МБ)
+                if (file.size <= 1024 * 1024) {
                     const fullPath = path + file.name;
                     files.push({ file, path: fullPath });
                 }
@@ -149,7 +153,6 @@
             const namesList = fileNames.join('_');
             let fullName = `${baseName}_${namesList}`;
             
-            // Ограничение длины имени файла (например, до 200 символов)
             if (fullName.length > 200) {
                 fullName = fullName.substring(0, 196) + '...';
             }
