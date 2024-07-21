@@ -5,77 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Объединитель файлов</title>
     <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --background-color: #f0f4f8;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        #drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 20px;
-            width: 100%;
-            padding: 20px;
+
+        h1 {
             text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
         }
-        #drop-area.highlight {
-            border-color: purple;
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
+
+        .section-title {
+            font-size: 1.2em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        #drop-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #drop-area:hover, #drop-area.highlight {
+            background-color: #e8f0fe;
+            border-color: var(--primary-color);
+        }
+
         #file-list {
             margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
         }
+
         .file-item {
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
         }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
         .file-item input[type="checkbox"] {
             margin-right: 10px;
         }
+
         .file-item .delete-icon {
-            margin-left: 10px;
+            margin-left: auto;
             cursor: pointer;
-            color: red;
+            color: #e74c3c;
+            font-weight: bold;
         }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        .extension-inputs, .preset-controls {
-            margin-top: 20px;
-        }
-        .extension-inputs input, .preset-controls input, .preset-controls select {
+
+        input[type="text"], select {
             width: 100%;
-            padding: 5px;
+            padding: 10px;
             margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        #clearButton, #deletePresetBtn {
+            background-color: #e74c3c;
+        }
+
+        #clearButton:hover, #deletePresetBtn:hover {
+            background-color: #c0392b;
+        }
+
+        .preset-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .preset-controls > * {
+            flex: 1 1 calc(33.333% - 10px);
+        }
+
+        @media (max-width: 600px) {
+            .preset-controls > * {
+                flex: 1 1 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Объединитель файлов</h1>
-    <div class="extension-inputs">
-        <label for="includeExtensions">Включить расширения (через запятую):</label>
-        <input type="text" id="includeExtensions" placeholder="Например: txt, js, css">
-        <label for="excludeExtensions">Исключить расширения (через запятую):</label>
-        <input type="text" id="excludeExtensions" placeholder="Например: pdf, doc, xls">
+    <div class="container">
+        <h1>Объединитель файлов</h1>
+        
+        <div class="section">
+            <div class="section-title">Настройки фильтрации</div>
+            <input type="text" id="includeExtensions" placeholder="Включить расширения (через запятую, например: txt, js, css)">
+            <input type="text" id="excludeExtensions" placeholder="Исключить расширения (через запятую, например: pdf, doc, xls)">
+        </div>
+
+        <div class="section">
+            <div class="section-title">Управление пресетами</div>
+            <div class="preset-controls">
+                <input type="text" id="presetName" placeholder="Название пресета">
+                <button id="savePresetBtn">Сохранить пресет</button>
+                <select id="presetSelect">
+                    <option value="">Выберите пресет</option>
+                </select>
+                <button id="loadPresetBtn">Загрузить пресет</button>
+                <button id="deletePresetBtn">Удалить пресет</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div id="drop-area">
+                <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
+                <input type="file" id="fileInput" multiple webkitdirectory hidden>
+            </div>
+            <div id="file-list"></div>
+        </div>
+
+        <div class="button-group">
+            <button id="combineButton">Объединить файлы</button>
+            <button id="clearButton">Очистить список</button>
+        </div>
     </div>
-    <div class="preset-controls">
-        <input type="text" id="presetName" placeholder="Название пресета">
-        <button id="savePresetBtn">Сохранить пресет</button>
-        <select id="presetSelect">
-            <option value="">Выберите пресет</option>
-        </select>
-        <button id="loadPresetBtn">Загрузить пресет</button>
-        <button id="deletePresetBtn">Удалить пресет</button>
-    </div>
-    <div id="drop-area">
-        <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
-        <input type="file" id="fileInput" multiple webkitdirectory hidden>
-    </div>
-    <div id="file-list"></div>
-    <button id="combineButton">Объединить файлы</button>
-    <button id="clearButton">Очистить список</button>
 
     <script>
         const dropArea = document.getElementById('drop-area');
