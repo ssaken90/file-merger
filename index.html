@@ -86,8 +86,24 @@
             margin-right: 10px;
         }
 
+        .file-item .file-info {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item .file-name {
+            margin-right: 10px;
+        }
+
+        .file-item .file-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+
         .file-item .delete-icon {
-            margin-left: auto;
+            margin-left: 10px;
             cursor: pointer;
             color: #e74c3c;
             font-weight: bold;
@@ -323,8 +339,16 @@
                     files[index].selected = checkbox.checked;
                 });
 
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+
                 const fileNameSpan = document.createElement('span');
+                fileNameSpan.className = 'file-name';
                 fileNameSpan.textContent = fileObj.path;
+
+                const fileSizeSpan = document.createElement('span');
+                fileSizeSpan.className = 'file-size';
+                fileSizeSpan.textContent = `${(fileObj.file.size / 1024).toFixed(2)} KB`;
 
                 const deleteIcon = document.createElement('span');
                 deleteIcon.textContent = '❌';
@@ -334,8 +358,11 @@
                     updateFileList();
                 });
 
+                fileInfo.appendChild(fileNameSpan);
+                fileInfo.appendChild(fileSizeSpan);
+
                 fileItem.appendChild(checkbox);
-                fileItem.appendChild(fileNameSpan);
+                fileItem.appendChild(fileInfo);
                 fileItem.appendChild(deleteIcon);
                 fileList.appendChild(fileItem);
             });
