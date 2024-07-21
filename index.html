@@ -42,10 +42,10 @@
             padding: 10px 20px;
             font-size: 16px;
         }
-        .extension-inputs {
+        .extension-inputs, .preset-controls {
             margin-top: 20px;
         }
-        .extension-inputs input {
+        .extension-inputs input, .preset-controls input, .preset-controls select {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
@@ -59,6 +59,15 @@
         <input type="text" id="includeExtensions" placeholder="Например: txt, js, css">
         <label for="excludeExtensions">Исключить расширения (через запятую):</label>
         <input type="text" id="excludeExtensions" placeholder="Например: pdf, doc, xls">
+    </div>
+    <div class="preset-controls">
+        <input type="text" id="presetName" placeholder="Название пресета">
+        <button id="savePresetBtn">Сохранить пресет</button>
+        <select id="presetSelect">
+            <option value="">Выберите пресет</option>
+        </select>
+        <button id="loadPresetBtn">Загрузить пресет</button>
+        <button id="deletePresetBtn">Удалить пресет</button>
     </div>
     <div id="drop-area">
         <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
@@ -76,7 +85,15 @@
         const clearButton = document.getElementById('clearButton');
         const includeExtensionsInput = document.getElementById('includeExtensions');
         const excludeExtensionsInput = document.getElementById('excludeExtensions');
+        const presetNameInput = document.getElementById('presetName');
+        const savePresetBtn = document.getElementById('savePresetBtn');
+        const presetSelect = document.getElementById('presetSelect');
+        const loadPresetBtn = document.getElementById('loadPresetBtn');
+        const deletePresetBtn = document.getElementById('deletePresetBtn');
         let files = [];
+
+        // Загрузка пресетов при инициализации
+        loadPresets();
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
@@ -107,6 +124,9 @@
         fileInput.addEventListener('change', handleFiles, false);
         dropArea.addEventListener('click', () => fileInput.click());
         clearButton.addEventListener('click', clearFileList);
+        savePresetBtn.addEventListener('click', savePreset);
+        loadPresetBtn.addEventListener('click', loadPreset);
+        deletePresetBtn.addEventListener('click', deletePreset);
 
         function getExtensionFilters() {
             const includeExtensions = includeExtensionsInput.value
@@ -211,6 +231,70 @@
         function clearFileList() {
             files = [];
             updateFileList();
+        }
+
+        function savePreset() {
+            const presetName = presetNameInput.value.trim();
+            if (!presetName) {
+                alert('Пожалуйста, введите название пресета');
+                return;
+            }
+
+            const preset = {
+                includeExtensions: includeExtensionsInput.value,
+                excludeExtensions: excludeExtensionsInput.value
+            };
+
+            let presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+            presets[presetName] = preset;
+            localStorage.setItem('filePresets', JSON.stringify(presets));
+
+            loadPresets(); // Обновляем список пресетов
+            alert('Пресет сохранен');
+        }
+
+        function loadPreset() {
+            const selectedPreset = presetSelect.value;
+            if (!selectedPreset) {
+                alert('Пожалуйста, выберите пресет');
+                return;
+            }
+
+            const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+            const preset = presets[selectedPreset];
+
+            if (preset) {
+                includeExtensionsInput.value = preset.includeExtensions;
+                excludeExtensionsInput.value = preset.excludeExtensions;
+                alert('Пресет загружен');
+            }
+        }
+
+        function deletePreset() {
+            const selectedPreset = presetSelect.value;
+            if (!selectedPreset) {
+                alert('Пожалуйста, выберите пресет для удаления');
+                return;
+            }
+
+            let presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+            delete presets[selectedPreset];
+            localStorage.setItem('filePresets', JSON.stringify(presets));
+
+            loadPresets(); // Обновляем список пресетов
+            alert('Пресет удален');
+        }
+
+        function loadPresets() {
+            const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+            presetSelect.innerHTML = '<option value="">Выберите пресет</option>';
+            
+            for (const presetName in presets) {
+                const option = document.createElement('option');
+                option.value = presetName;
+                option.textContent = presetName;
+                presetSelect.appendChild(option);
+            }
         }
 
         combineButton.addEventListener('click', combineFiles);
