@@ -42,10 +42,24 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+        .extension-inputs {
+            margin-top: 20px;
+        }
+        .extension-inputs input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>Объединитель файлов</h1>
+    <div class="extension-inputs">
+        <label for="includeExtensions">Включить расширения (через запятую):</label>
+        <input type="text" id="includeExtensions" placeholder="Например: txt, js, css">
+        <label for="excludeExtensions">Исключить расширения (через запятую):</label>
+        <input type="text" id="excludeExtensions" placeholder="Например: pdf, doc, xls">
+    </div>
     <div id="drop-area">
         <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
         <input type="file" id="fileInput" multiple webkitdirectory hidden>
@@ -60,6 +74,8 @@
         const fileList = document.getElementById('file-list');
         const combineButton = document.getElementById('combineButton');
         const clearButton = document.getElementById('clearButton');
+        const includeExtensionsInput = document.getElementById('includeExtensions');
+        const excludeExtensionsInput = document.getElementById('excludeExtensions');
         let files = [];
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -92,6 +108,33 @@
         dropArea.addEventListener('click', () => fileInput.click());
         clearButton.addEventListener('click', clearFileList);
 
+        function getExtensionFilters() {
+            const includeExtensions = includeExtensionsInput.value
+                .split(',')
+                .map(ext => ext.trim().toLowerCase())
+                .filter(ext => ext);
+            const excludeExtensions = excludeExtensionsInput.value
+                .split(',')
+                .map(ext => ext.trim().toLowerCase())
+                .filter(ext => ext);
+            return { includeExtensions, excludeExtensions };
+        }
+
+        function shouldIncludeFile(fileName) {
+            const { includeExtensions, excludeExtensions } = getExtensionFilters();
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+
+            if (excludeExtensions.includes(fileExtension)) {
+                return false;
+            }
+
+            if (includeExtensions.length > 0) {
+                return includeExtensions.includes(fileExtension);
+            }
+
+            return true;
+        }
+
         async function handleDrop(e) {
             const items = e.dataTransfer.items;
             for (const item of items) {
@@ -109,7 +152,7 @@
             const selectedFiles = e.target.files;
             for (const file of selectedFiles) {
                 const relativePath = file.webkitRelativePath || file.name;
-                if (file.size <= 1024 * 1024) {
+                if (file.size <= 1024 * 1024 && shouldIncludeFile(file.name)) {
                     files.push({ file, path: relativePath, selected: true });
                 }
             }
@@ -119,7 +162,7 @@
         async function traverseFileTree(item, path = '') {
             if (item.isFile) {
                 const file = await new Promise((resolve) => item.file(resolve));
-                if (file.size <= 1024 * 1024) {
+                if (file.size <= 1024 * 1024 && shouldIncludeFile(file.name)) {
                     const fullPath = path + file.name;
                     files.push({ file, path: fullPath, selected: true });
                 }
