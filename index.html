@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Объединитель файлов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -173,12 +173,15 @@
     <div class="container">
         <h1>Объединитель файлов</h1>
         
+        <!-- Настройки фильтрации -->
         <div class="section">
             <div class="section-title">Настройки фильтрации</div>
-            <input type="text" id="includeExtensions" placeholder="Включить расширения (через запятую, например: txt, js, css)">
-            <input type="text" id="excludeExtensions" placeholder="Исключить расширения (через запятую, например: pdf, doc, xls)">
+            <input type="text" id="includeExtensions" placeholder="Включить расширения (например: txt, js, css)">
+            <input type="text" id="excludeExtensions" placeholder="Исключить расширения (например: pdf, doc, xls)">
+            <input type="number" id="maxFileSize" placeholder="Максимальный размер файла в МБ" min="0" step="0.1">
         </div>
 
+        <!-- Управление пресетами -->
         <div class="section">
             <div class="section-title">Управление пресетами</div>
             <div class="preset-controls">
@@ -192,6 +195,7 @@
             </div>
         </div>
 
+        <!-- Загрузка файлов -->
         <div class="section">
             <div id="drop-area">
                 <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
@@ -200,6 +204,7 @@
             <div id="file-list"></div>
         </div>
 
+        <!-- Кнопки действий -->
         <div class="button-group">
             <button id="combineButton">Объединить файлы</button>
             <button id="clearButton">Очистить список</button>
@@ -207,290 +212,343 @@
     </div>
 
     <script>
-        const dropArea = document.getElementById('drop-area');
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('file-list');
-        const combineButton = document.getElementById('combineButton');
-        const clearButton = document.getElementById('clearButton');
-        const includeExtensionsInput = document.getElementById('includeExtensions');
-        const excludeExtensionsInput = document.getElementById('excludeExtensions');
-        const presetNameInput = document.getElementById('presetName');
-        const savePresetBtn = document.getElementById('savePresetBtn');
-        const presetSelect = document.getElementById('presetSelect');
-        const loadPresetBtn = document.getElementById('loadPresetBtn');
-        const deletePresetBtn = document.getElementById('deletePresetBtn');
-        let files = [];
+        (function() {
+            'use strict';
 
-        // Загрузка пресетов при инициализации
-        loadPresets();
+            // Элементы DOM
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('file-list');
+            const combineButton = document.getElementById('combineButton');
+            const clearButton = document.getElementById('clearButton');
+            const includeExtensionsInput = document.getElementById('includeExtensions');
+            const excludeExtensionsInput = document.getElementById('excludeExtensions');
+            const maxFileSizeInput = document.getElementById('maxFileSize');
+            const presetNameInput = document.getElementById('presetName');
+            const savePresetBtn = document.getElementById('savePresetBtn');
+            const presetSelect = document.getElementById('presetSelect');
+            const loadPresetBtn = document.getElementById('loadPresetBtn');
+            const deletePresetBtn = document.getElementById('deletePresetBtn');
 
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
+            // Переменные
+            let files = [];
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+            // Инициализация
+            document.addEventListener('DOMContentLoaded', () => {
+                initEventListeners();
+                loadPresets();
+            });
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
+            // Функции инициализации событий
+            function initEventListeners() {
+                // Предотвращение поведения по умолчанию для событий перетаскивания
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false);
+                });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
+                // Подсветка области при перетаскивании
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, highlight, false);
+                });
 
-        function highlight() {
-            dropArea.classList.add('highlight');
-        }
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, unhighlight, false);
+                });
 
-        function unhighlight() {
-            dropArea.classList.remove('highlight');
-        }
-
-        dropArea.addEventListener('drop', handleDrop, false);
-        fileInput.addEventListener('change', handleFiles, false);
-        dropArea.addEventListener('click', () => fileInput.click());
-        clearButton.addEventListener('click', clearFileList);
-        savePresetBtn.addEventListener('click', savePreset);
-        loadPresetBtn.addEventListener('click', loadPreset);
-        deletePresetBtn.addEventListener('click', deletePreset);
-
-        function getExtensionFilters() {
-            const includeExtensions = includeExtensionsInput.value
-                .split(',')
-                .map(ext => ext.trim().toLowerCase())
-                .filter(ext => ext);
-            const excludeExtensions = excludeExtensionsInput.value
-                .split(',')
-                .map(ext => ext.trim().toLowerCase())
-                .filter(ext => ext);
-            return { includeExtensions, excludeExtensions };
-        }
-
-        function shouldIncludeFile(fileName) {
-            const { includeExtensions, excludeExtensions } = getExtensionFilters();
-            const fileExtension = fileName.split('.').pop().toLowerCase();
-
-            if (excludeExtensions.includes(fileExtension)) {
-                return false;
+                // Обработчики событий
+                dropArea.addEventListener('drop', handleDrop, false);
+                dropArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', handleFiles, false);
+                clearButton.addEventListener('click', clearFileList);
+                savePresetBtn.addEventListener('click', savePreset);
+                loadPresetBtn.addEventListener('click', loadPreset);
+                deletePresetBtn.addEventListener('click', deletePreset);
+                combineButton.addEventListener('click', combineFiles);
             }
 
-            if (includeExtensions.length > 0) {
-                return includeExtensions.includes(fileExtension);
+            // Предотвращение поведения по умолчанию
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
 
-            return true;
-        }
+            // Подсветка области
+            function highlight() {
+                dropArea.classList.add('highlight');
+            }
 
-        async function handleDrop(e) {
-            const items = e.dataTransfer.items;
-            for (const item of items) {
-                if (item.kind === 'file') {
-                    const entry = item.webkitGetAsEntry();
-                    if (entry) {
-                        await traverseFileTree(entry);
+            function unhighlight() {
+                dropArea.classList.remove('highlight');
+            }
+
+            // Получение настроек фильтрации
+            function getFilters() {
+                const includeExtensions = parseExtensions(includeExtensionsInput.value);
+                const excludeExtensions = parseExtensions(excludeExtensionsInput.value);
+                const maxFileSize = parseFloat(maxFileSizeInput.value) || Infinity;
+
+                return { includeExtensions, excludeExtensions, maxFileSize };
+            }
+
+            // Парсинг расширений
+            function parseExtensions(value) {
+                return value.split(',').map(ext => ext.trim().toLowerCase()).filter(Boolean);
+            }
+
+            // Проверка, следует ли включать файл
+            function shouldIncludeFile(file) {
+                const { includeExtensions, excludeExtensions, maxFileSize } = getFilters();
+                const fileExtension = getFileExtension(file.name);
+                const fileSizeMB = file.size / (1024 * 1024);
+
+                if (excludeExtensions.includes(fileExtension)) return false;
+                if (includeExtensions.length && !includeExtensions.includes(fileExtension)) return false;
+                if (fileSizeMB > maxFileSize) return false;
+
+                return true;
+            }
+
+            // Получение расширения файла
+            function getFileExtension(filename) {
+                return filename.split('.').pop().toLowerCase();
+            }
+
+            // Обработка перетаскивания файлов
+            async function handleDrop(e) {
+                const items = e.dataTransfer.items;
+                for (const item of items) {
+                    if (item.kind === 'file') {
+                        const entry = item.webkitGetAsEntry();
+                        if (entry) {
+                            await traverseFileTree(entry);
+                        }
+                    }
+                }
+                updateFileList();
+            }
+
+            // Обработка выбранных файлов
+            async function handleFiles(e) {
+                const selectedFiles = e.target.files;
+                for (const file of selectedFiles) {
+                    const relativePath = file.webkitRelativePath || file.name;
+                    if (shouldIncludeFile(file)) {
+                        files.push({ file, path: relativePath, selected: true });
+                    }
+                }
+                updateFileList();
+            }
+
+            // Рекурсивный обход файловой системы
+            async function traverseFileTree(item, path = '') {
+                if (item.isFile) {
+                    const file = await new Promise(resolve => item.file(resolve));
+                    if (shouldIncludeFile(file)) {
+                        const fullPath = path + file.name;
+                        files.push({ file, path: fullPath, selected: true });
+                    }
+                } else if (item.isDirectory) {
+                    const dirReader = item.createReader();
+                    const entries = await readAllEntries(dirReader);
+                    for (const entry of entries) {
+                        await traverseFileTree(entry, path + item.name + '/');
                     }
                 }
             }
-            updateFileList();
-        }
 
-        async function handleFiles(e) {
-            const selectedFiles = e.target.files;
-            for (const file of selectedFiles) {
-                const relativePath = file.webkitRelativePath || file.name;
-                if (file.size <= 1024 * 1024 && shouldIncludeFile(file.name)) {
-                    files.push({ file, path: relativePath, selected: true });
+            // Чтение всех записей каталога
+            function readAllEntries(dirReader) {
+                const entries = [];
+                return new Promise(resolve => {
+                    const readEntries = () => {
+                        dirReader.readEntries(result => {
+                            if (!result.length) {
+                                resolve(entries);
+                            } else {
+                                entries.push(...result);
+                                readEntries();
+                            }
+                        });
+                    };
+                    readEntries();
+                });
+            }
+
+            // Обновление списка файлов
+            function updateFileList() {
+                fileList.innerHTML = '';
+                files.forEach((fileObj, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = fileObj.selected;
+                    checkbox.addEventListener('change', () => {
+                        files[index].selected = checkbox.checked;
+                    });
+
+                    const fileInfo = document.createElement('div');
+                    fileInfo.className = 'file-info';
+
+                    const fileNameSpan = document.createElement('span');
+                    fileNameSpan.className = 'file-name';
+                    fileNameSpan.textContent = fileObj.path;
+
+                    const fileSizeSpan = document.createElement('span');
+                    fileSizeSpan.className = 'file-size';
+                    fileSizeSpan.textContent = `${(fileObj.file.size / 1024).toFixed(2)} KB`;
+
+                    const deleteIcon = document.createElement('span');
+                    deleteIcon.textContent = '❌';
+                    deleteIcon.className = 'delete-icon';
+                    deleteIcon.addEventListener('click', () => {
+                        files.splice(index, 1);
+                        updateFileList();
+                    });
+
+                    fileInfo.appendChild(fileNameSpan);
+                    fileInfo.appendChild(fileSizeSpan);
+
+                    fileItem.appendChild(checkbox);
+                    fileItem.appendChild(fileInfo);
+                    fileItem.appendChild(deleteIcon);
+                    fileList.appendChild(fileItem);
+                });
+            }
+
+            // Очистка списка файлов
+            function clearFileList() {
+                files = [];
+                updateFileList();
+            }
+
+            // Сохранение пресета
+            function savePreset() {
+                const presetName = presetNameInput.value.trim();
+                if (!presetName) {
+                    alert('Пожалуйста, введите название пресета');
+                    return;
+                }
+
+                const preset = {
+                    includeExtensions: includeExtensionsInput.value,
+                    excludeExtensions: excludeExtensionsInput.value,
+                    maxFileSize: maxFileSizeInput.value
+                };
+
+                let presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+                presets[presetName] = preset;
+                localStorage.setItem('filePresets', JSON.stringify(presets));
+
+                loadPresets();
+                alert('Пресет сохранен');
+            }
+
+            // Загрузка пресета
+            function loadPreset() {
+                const selectedPreset = presetSelect.value;
+                if (!selectedPreset) {
+                    alert('Пожалуйста, выберите пресет');
+                    return;
+                }
+
+                const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+                const preset = presets[selectedPreset];
+
+                if (preset) {
+                    includeExtensionsInput.value = preset.includeExtensions;
+                    excludeExtensionsInput.value = preset.excludeExtensions;
+                    maxFileSizeInput.value = preset.maxFileSize;
+                    alert('Пресет загружен');
                 }
             }
-            updateFileList();
-        }
 
-        async function traverseFileTree(item, path = '') {
-            if (item.isFile) {
-                const file = await new Promise((resolve) => item.file(resolve));
-                if (file.size <= 1024 * 1024 && shouldIncludeFile(file.name)) {
-                    const fullPath = path + file.name;
-                    files.push({ file, path: fullPath, selected: true });
+            // Удаление пресета
+            function deletePreset() {
+                const selectedPreset = presetSelect.value;
+                if (!selectedPreset) {
+                    alert('Пожалуйста, выберите пресет для удаления');
+                    return;
                 }
-            } else if (item.isDirectory) {
-                const dirReader = item.createReader();
-                const entries = await new Promise((resolve) => {
-                    dirReader.readEntries(resolve);
-                });
-                for (const entry of entries) {
-                    await traverseFileTree(entry, path + item.name + '/');
+
+                let presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+                delete presets[selectedPreset];
+                localStorage.setItem('filePresets', JSON.stringify(presets));
+
+                loadPresets();
+                alert('Пресет удален');
+            }
+
+            // Загрузка списка пресетов
+            function loadPresets() {
+                const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
+                presetSelect.innerHTML = '<option value="">Выберите пресет</option>';
+                
+                for (const presetName in presets) {
+                    const option = document.createElement('option');
+                    option.value = presetName;
+                    option.textContent = presetName;
+                    presetSelect.appendChild(option);
                 }
             }
-        }
 
-        function updateFileList() {
-            fileList.innerHTML = '';
-            files.forEach((fileObj, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
+            // Объединение файлов
+            async function combineFiles() {
+                const selectedFiles = files.filter(f => f.selected);
+                if (selectedFiles.length === 0) {
+                    alert('Пожалуйста, выберите файлы для объединения.');
+                    return;
+                }
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = fileObj.selected;
-                checkbox.addEventListener('change', () => {
-                    files[index].selected = checkbox.checked;
+                let combinedContent = '';
+                let fileNames = [];
+
+                for (const { file, path } of selectedFiles) {
+                    const content = await readFile(file);
+                    combinedContent += `/* ${path} */\n${content}\n\n`;
+                    fileNames.push(getBaseFileName(file.name));
+                }
+
+                const outputFileName = generateOutputFileName(fileNames);
+                downloadCombinedFile(combinedContent, outputFileName);
+            }
+
+            // Генерация имени выходного файла
+            function generateOutputFileName(fileNames) {
+                const baseName = 'combined_files';
+                const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
+                return `${baseName}_${timestamp}.txt`;
+            }
+
+            // Получение базового имени файла
+            function getBaseFileName(filename) {
+                return filename.split('.').slice(0, -1).join('.');
+            }
+
+            // Чтение файла
+            function readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.onerror = e => reject(e);
+                    reader.readAsText(file);
                 });
-
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'file-info';
-
-                const fileNameSpan = document.createElement('span');
-                fileNameSpan.className = 'file-name';
-                fileNameSpan.textContent = fileObj.path;
-
-                const fileSizeSpan = document.createElement('span');
-                fileSizeSpan.className = 'file-size';
-                fileSizeSpan.textContent = `${(fileObj.file.size / 1024).toFixed(2)} KB`;
-
-                const deleteIcon = document.createElement('span');
-                deleteIcon.textContent = '❌';
-                deleteIcon.className = 'delete-icon';
-                deleteIcon.addEventListener('click', () => {
-                    files.splice(index, 1);
-                    updateFileList();
-                });
-
-                fileInfo.appendChild(fileNameSpan);
-                fileInfo.appendChild(fileSizeSpan);
-
-                fileItem.appendChild(checkbox);
-                fileItem.appendChild(fileInfo);
-                fileItem.appendChild(deleteIcon);
-                fileList.appendChild(fileItem);
-            });
-        }
-
-        function clearFileList() {
-            files = [];
-            updateFileList();
-        }
-
-        function savePreset() {
-            const presetName = presetNameInput.value.trim();
-            if (!presetName) {
-                alert('Пожалуйста, введите название пресета');
-                return;
             }
 
-            const preset = {
-                includeExtensions: includeExtensionsInput.value,
-                excludeExtensions: excludeExtensionsInput.value
-            };
-
-            let presets = JSON.parse(localStorage.getItem('filePresets')) || {};
-            presets[presetName] = preset;
-            localStorage.setItem('filePresets', JSON.stringify(presets));
-
-            loadPresets(); // Обновляем список пресетов
-            alert('Пресет сохранен');
-        }
-
-        function loadPreset() {
-            const selectedPreset = presetSelect.value;
-            if (!selectedPreset) {
-                alert('Пожалуйста, выберите пресет');
-                return;
+            // Скачивание объединенного файла
+            function downloadCombinedFile(content, fileName) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             }
-
-            const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
-            const preset = presets[selectedPreset];
-
-            if (preset) {
-                includeExtensionsInput.value = preset.includeExtensions;
-                excludeExtensionsInput.value = preset.excludeExtensions;
-                alert('Пресет загружен');
-            }
-        }
-
-        function deletePreset() {
-            const selectedPreset = presetSelect.value;
-            if (!selectedPreset) {
-                alert('Пожалуйста, выберите пресет для удаления');
-                return;
-            }
-
-            let presets = JSON.parse(localStorage.getItem('filePresets')) || {};
-            delete presets[selectedPreset];
-            localStorage.setItem('filePresets', JSON.stringify(presets));
-
-            loadPresets(); // Обновляем список пресетов
-            alert('Пресет удален');
-        }
-
-        function loadPresets() {
-            const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
-            presetSelect.innerHTML = '<option value="">Выберите пресет</option>';
-            
-            for (const presetName in presets) {
-                const option = document.createElement('option');
-                option.value = presetName;
-                option.textContent = presetName;
-                presetSelect.appendChild(option);
-            }
-        }
-
-        combineButton.addEventListener('click', combineFiles);
-
-        async function combineFiles() {
-            const selectedFiles = files.filter(f => f.selected);
-            if (selectedFiles.length === 0) {
-                alert('Пожалуйста, выберите файлы для объединения.');
-                return;
-            }
-
-            let combinedContent = '';
-            let fileNames = [];
-
-            for (const { file, path } of selectedFiles) {
-                const content = await readFile(file);
-                combinedContent += `${path};\n${content}\n\n\n`;
-                fileNames.push(file.name.split('.').slice(0, -1).join('.'));
-            }
-
-            const outputFileName = generateOutputFileName(fileNames);
-            downloadCombinedFile(combinedContent, outputFileName);
-        }
-
-        function generateOutputFileName(fileNames) {
-            const baseName = 'combined_files';
-            const namesList = fileNames.join('_');
-            let fullName = `${baseName}_${namesList}`;
-            
-            if (fullName.length > 200) {
-                fullName = fullName.substring(0, 196) + '...';
-            }
-            
-            return fullName + '.txt';
-        }
-
-        function readFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = (e) => reject(e);
-                reader.readAsText(file);
-            });
-        }
-
-        function downloadCombinedFile(content, fileName) {
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
+        })();
     </script>
 </body>
 </html>
