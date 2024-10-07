@@ -4,129 +4,161 @@
     <meta charset="UTF-8">
     <title>Объединитель файлов</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Подключение Google Fonts и Font Awesome для иконок -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
+        /* Стилизация с улучшенным интерфейсом */
         :root {
             --primary-color: #4a90e2;
             --secondary-color: #f5a623;
             --background-color: #f0f4f8;
             --text-color: #333;
             --border-color: #ddd;
+            --hover-color: #e8f0fe;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --font-family: 'Roboto', sans-serif;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
+            font-family: var(--font-family);
             background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
             padding: 20px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             text-align: center;
             color: var(--primary-color);
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            font-weight: 500;
         }
 
         .section {
             margin-bottom: 30px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .section-title {
-            font-size: 1.2em;
+            font-size: 1.4em;
             color: var(--primary-color);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
         }
 
         #drop-area {
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 30px;
+            border: 2px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 40px;
             text-align: center;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            background-color: #fff;
         }
 
         #drop-area:hover, #drop-area.highlight {
-            background-color: #e8f0fe;
-            border-color: var(--primary-color);
+            background-color: var(--hover-color);
         }
 
         #file-list {
             margin-top: 20px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 10px;
+            padding: 15px 20px;
             border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .file-item:hover {
+            background-color: #f9fafb;
         }
 
         .file-item:last-child {
             border-bottom: none;
         }
 
-        .file-item input[type="checkbox"] {
-            margin-right: 10px;
-        }
-
-        .file-item .file-info {
+        .file-info {
             flex-grow: 1;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
         }
 
-        .file-item .file-name {
-            margin-right: 10px;
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 5px;
         }
 
-        .file-item .file-size {
-            color: #666;
+        .file-size {
+            color: #888;
             font-size: 0.9em;
         }
 
-        .file-item .delete-icon {
-            margin-left: 10px;
-            cursor: pointer;
-            color: #e74c3c;
-            font-weight: bold;
+        .file-actions {
+            display: flex;
+            align-items: center;
         }
 
-        input[type="text"], select {
+        .file-actions input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .file-actions .delete-icon {
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.2s ease;
+        }
+
+        .file-actions .delete-icon:hover {
+            color: #c0392b;
+        }
+
+        input[type="text"], input[type="number"], select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
         }
 
         button {
             background-color: var(--primary-color);
-            color: white;
+            color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 12px 25px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         button:hover {
@@ -136,16 +168,16 @@
         .button-group {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .button-group button {
             flex: 1;
-            margin: 0 5px;
+            margin: 0 10px;
         }
 
         #clearButton, #deletePresetBtn {
-            background-color: #e74c3c;
+            background-color: var(--danger-color);
         }
 
         #clearButton:hover, #deletePresetBtn:hover {
@@ -155,11 +187,11 @@
         .preset-controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
 
         .preset-controls > * {
-            flex: 1 1 calc(33.333% - 10px);
+            flex: 1 1 calc(50% - 15px);
         }
 
         @media (max-width: 600px) {
@@ -167,9 +199,38 @@
                 flex: 1 1 100%;
             }
         }
+
+        /* Темная тема */
+        .dark-mode {
+            --background-color: #1e1e1e;
+            --text-color: #f0f0f0;
+            --border-color: #444;
+            --hover-color: #333;
+            --primary-color: #4a90e2;
+        }
+
+        /* Переключатель тем */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: var(--primary-color);
+            transition: color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            color: #357abd;
+        }
     </style>
 </head>
 <body>
+    <!-- Переключатель тем -->
+    <div class="theme-toggle" id="themeToggle" title="Переключить тему">
+        <i class="fas fa-moon"></i>
+    </div>
+
     <div class="container">
         <h1>Объединитель файлов</h1>
         
@@ -178,7 +239,7 @@
             <div class="section-title">Настройки фильтрации</div>
             <input type="text" id="includeExtensions" placeholder="Включить расширения (например: txt, js, css)">
             <input type="text" id="excludeExtensions" placeholder="Исключить расширения (например: pdf, doc, xls)">
-            <input type="number" id="maxFileSize" placeholder="Максимальный размер файла в МБ" min="0" step="0.1">
+            <input type="number" id="maxFileSize" placeholder="Максимальный размер файла в МБ" min="0" step="0.1" value="1048576">
         </div>
 
         <!-- Управление пресетами -->
@@ -186,19 +247,20 @@
             <div class="section-title">Управление пресетами</div>
             <div class="preset-controls">
                 <input type="text" id="presetName" placeholder="Название пресета">
-                <button id="savePresetBtn">Сохранить пресет</button>
+                <button id="savePresetBtn"><i class="fas fa-save"></i> Сохранить пресет</button>
                 <select id="presetSelect">
                     <option value="">Выберите пресет</option>
                 </select>
-                <button id="loadPresetBtn">Загрузить пресет</button>
-                <button id="deletePresetBtn">Удалить пресет</button>
+                <button id="loadPresetBtn"><i class="fas fa-upload"></i> Загрузить пресет</button>
+                <button id="deletePresetBtn"><i class="fas fa-trash-alt"></i> Удалить пресет</button>
             </div>
         </div>
 
         <!-- Загрузка файлов -->
         <div class="section">
             <div id="drop-area">
-                <p>Перетащите файлы или папки сюда или нажмите для выбора</p>
+                <p><i class="fas fa-cloud-upload-alt" style="font-size: 3em; color: var(--primary-color);"></i></p>
+                <p style="font-size: 1.2em;">Перетащите файлы или папки сюда или нажмите для выбора</p>
                 <input type="file" id="fileInput" multiple webkitdirectory hidden>
             </div>
             <div id="file-list"></div>
@@ -206,8 +268,8 @@
 
         <!-- Кнопки действий -->
         <div class="button-group">
-            <button id="combineButton">Объединить файлы</button>
-            <button id="clearButton">Очистить список</button>
+            <button id="combineButton"><i class="fas fa-file-medical"></i> Объединить файлы</button>
+            <button id="clearButton"><i class="fas fa-eraser"></i> Очистить список</button>
         </div>
     </div>
 
@@ -229,6 +291,7 @@
             const presetSelect = document.getElementById('presetSelect');
             const loadPresetBtn = document.getElementById('loadPresetBtn');
             const deletePresetBtn = document.getElementById('deletePresetBtn');
+            const themeToggle = document.getElementById('themeToggle');
 
             // Переменные
             let files = [];
@@ -237,6 +300,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 initEventListeners();
                 loadPresets();
+                loadTheme();
             });
 
             // Функции инициализации событий
@@ -264,6 +328,7 @@
                 loadPresetBtn.addEventListener('click', loadPreset);
                 deletePresetBtn.addEventListener('click', deletePreset);
                 combineButton.addEventListener('click', combineFiles);
+                themeToggle.addEventListener('click', toggleTheme);
             }
 
             // Предотвращение поведения по умолчанию
@@ -380,16 +445,11 @@
                 files.forEach((fileObj, index) => {
                     const fileItem = document.createElement('div');
                     fileItem.className = 'file-item';
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.checked = fileObj.selected;
-                    checkbox.addEventListener('change', () => {
-                        files[index].selected = checkbox.checked;
-                    });
+                    fileItem.draggable = true;
 
                     const fileInfo = document.createElement('div');
                     fileInfo.className = 'file-info';
+                    fileInfo.addEventListener('click', () => previewFileContent(fileObj));
 
                     const fileNameSpan = document.createElement('span');
                     fileNameSpan.className = 'file-name';
@@ -399,9 +459,18 @@
                     fileSizeSpan.className = 'file-size';
                     fileSizeSpan.textContent = `${(fileObj.file.size / 1024).toFixed(2)} KB`;
 
-                    const deleteIcon = document.createElement('span');
-                    deleteIcon.textContent = '❌';
-                    deleteIcon.className = 'delete-icon';
+                    const fileActions = document.createElement('div');
+                    fileActions.className = 'file-actions';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = fileObj.selected;
+                    checkbox.addEventListener('change', () => {
+                        files[index].selected = checkbox.checked;
+                    });
+
+                    const deleteIcon = document.createElement('i');
+                    deleteIcon.className = 'fas fa-trash-alt delete-icon';
                     deleteIcon.addEventListener('click', () => {
                         files.splice(index, 1);
                         updateFileList();
@@ -410,11 +479,69 @@
                     fileInfo.appendChild(fileNameSpan);
                     fileInfo.appendChild(fileSizeSpan);
 
-                    fileItem.appendChild(checkbox);
+                    fileActions.appendChild(checkbox);
+                    fileActions.appendChild(deleteIcon);
+
                     fileItem.appendChild(fileInfo);
-                    fileItem.appendChild(deleteIcon);
+                    fileItem.appendChild(fileActions);
+
+                    // События для перетаскивания файлов в списке
+                    fileItem.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', index);
+                    });
+
+                    fileItem.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        fileItem.style.backgroundColor = '#f1f1f1';
+                    });
+
+                    fileItem.addEventListener('dragleave', () => {
+                        fileItem.style.backgroundColor = '';
+                    });
+
+                    fileItem.addEventListener('drop', e => {
+                        e.preventDefault();
+                        const draggedIndex = e.dataTransfer.getData('text/plain');
+                        const targetIndex = index;
+                        swapFiles(draggedIndex, targetIndex);
+                        fileItem.style.backgroundColor = '';
+                    });
+
                     fileList.appendChild(fileItem);
                 });
+            }
+
+            // Функция для обмена местами файлов в массиве
+            function swapFiles(fromIndex, toIndex) {
+                const temp = files[fromIndex];
+                files[fromIndex] = files[toIndex];
+                files[toIndex] = temp;
+                updateFileList();
+            }
+
+            // Предварительный просмотр содержимого файла
+            async function previewFileContent(fileObj) {
+                const content = await readFile(fileObj.file);
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+
+                const closeBtn = document.createElement('span');
+                closeBtn.className = 'close-button';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+
+                const pre = document.createElement('pre');
+                pre.textContent = content;
+
+                modalContent.appendChild(closeBtn);
+                modalContent.appendChild(pre);
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
             }
 
             // Очистка списка файлов
@@ -547,6 +674,25 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+            }
+
+            // Переключение темы
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            }
+
+            // Загрузка темы из localStorage
+            function loadTheme() {
+                const theme = localStorage.getItem('theme') || 'light';
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
             }
         })();
     </script>
