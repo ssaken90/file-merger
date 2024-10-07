@@ -225,6 +225,53 @@
         .theme-toggle:hover {
             color: #357abd;
         }
+		
+		.collapsible {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            transition: 0.4s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #357abd;
+        }
+
+        .collapsible:after {
+            content: '\002B';
+            color: white;
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "\2212";
+        }
+
+        .collapsible-content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: #f1f1f1;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .dark-mode .collapsible-content {
+            background-color: #2a2a2a;
+        }
     </style>
 </head>
 <body>
@@ -237,24 +284,28 @@
         <h1>Объединитель файлов</h1>
         
         <!-- Настройки фильтрации -->
-        <div class="section">
-            <div class="section-title">Настройки фильтрации</div>
-            <input type="text" id="includeExtensions" placeholder="Включить расширения (например: txt, js, css)">
-            <input type="text" id="excludeExtensions" placeholder="Исключить расширения (например: pdf, doc, xls)">
-            <input type="number" id="maxFileSize" placeholder="Максимальный размер файла в МБ" min="0" step="0.1" value="1048576">
+        <button class="collapsible">Настройки фильтрации</button>
+        <div class="collapsible-content">
+            <div class="section">
+                <input type="text" id="includeExtensions" placeholder="Включить расширения (например: txt, js, css)">
+                <input type="text" id="excludeExtensions" placeholder="Исключить расширения (например: pdf, doc, xls)">
+                <input type="number" id="maxFileSize" placeholder="Максимальный размер файла в МБ" min="0" step="0.1" value="1048576">
+            </div>
         </div>
 
         <!-- Управление пресетами -->
-        <div class="section">
-            <div class="section-title">Управление пресетами</div>
-            <div class="preset-controls">
-                <input type="text" id="presetName" placeholder="Название пресета">
-                <button id="savePresetBtn"><i class="fas fa-save"></i> Сохранить пресет</button>
-                <select id="presetSelect">
-                    <option value="">Выберите пресет</option>
-                </select>
-                <button id="loadPresetBtn"><i class="fas fa-upload"></i> Загрузить пресет</button>
-                <button id="deletePresetBtn"><i class="fas fa-trash-alt"></i> Удалить пресет</button>
+        <button class="collapsible">Управление пресетами</button>
+        <div class="collapsible-content">
+            <div class="section">
+                <div class="preset-controls">
+                    <input type="text" id="presetName" placeholder="Название пресета">
+                    <button id="savePresetBtn"><i class="fas fa-save"></i> Сохранить пресет</button>
+                    <select id="presetSelect">
+                        <option value="">Выберите пресет</option>
+                    </select>
+                    <button id="loadPresetBtn"><i class="fas fa-upload"></i> Загрузить пресет</button>
+                    <button id="deletePresetBtn"><i class="fas fa-trash-alt"></i> Удалить пресет</button>
+                </div>
             </div>
         </div>
 
@@ -303,6 +354,7 @@
                 initEventListeners();
                 loadPresets();
                 loadTheme();
+                initCollapsibles();
             });
 
             // Функции инициализации событий
@@ -331,6 +383,28 @@
                 deletePresetBtn.addEventListener('click', deletePreset);
                 combineButton.addEventListener('click', combineFiles);
                 themeToggle.addEventListener('click', toggleTheme);
+				
+				// Добавляем обработчики для сворачиваемых секций
+                const collapsibles = document.getElementsByClassName("collapsible");
+                for (let i = 0; i < collapsibles.length; i++) {
+                    collapsibles[i].addEventListener("click", function() {
+                        this.classList.toggle("active");
+                        var content = this.nextElementSibling;
+                        if (content.style.maxHeight) {
+                            content.style.maxHeight = null;
+                        } else {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                        }
+                    });
+                }
+            }
+			
+			// Инициализация сворачиваемых секций
+            function initCollapsibles() {
+                const collapsibles = document.getElementsByClassName("collapsible");
+                for (let i = 0; i < collapsibles.length; i++) {
+                    collapsibles[i].nextElementSibling.style.maxHeight = null;
+                }
             }
 
             // Предотвращение поведения по умолчанию
