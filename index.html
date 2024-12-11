@@ -356,9 +356,9 @@
             color: #fff;
         }
 
-        /* Новые элементы для фильтра */
-        #fileFilterInput {
-            margin-bottom: 10px;
+        /* Новые элементы для двойной фильтрации */
+        .filter-section {
+            margin-top: 20px;
         }
 
         .filter-actions {
@@ -410,11 +410,17 @@
                 <p style="font-size: 1.2em;">Перетащите файлы или папки сюда или нажмите для выбора</p>
                 <input type="file" id="fileInput" multiple webkitdirectory hidden>
             </div>
-            <input type="text" id="fileFilterInput" placeholder="Поиск по имени или пути файла (без учета регистра)">
-            <div class="filter-actions">
-                <button id="selectAllFilteredBtn">Отметить все отфильтрованные</button>
-                <button id="deselectAllFilteredBtn">Снять отметки со всех отфильтрованных</button>
+            
+            <div class="filter-section">
+                <input type="text" id="fileIncludeFilterInput" placeholder="Включать по имени или пути файла (без учета регистра)">
+                <input type="text" id="fileExcludeFilterInput" placeholder="Исключать по имени или пути файла (без учета регистра)">
+
+                <div class="filter-actions">
+                    <button id="selectAllFilteredBtn">Отметить все отфильтрованные</button>
+                    <button id="deselectAllFilteredBtn">Снять отметки со всех отфильтрованных</button>
+                </div>
             </div>
+
             <div id="file-list"></div>
         </div>
 
@@ -444,7 +450,8 @@
             const loadPresetBtn = document.getElementById('loadPresetBtn');
             const deletePresetBtn = document.getElementById('deletePresetBtn');
             const themeToggle = document.getElementById('themeToggle');
-            const fileFilterInput = document.getElementById('fileFilterInput');
+            const fileIncludeFilterInput = document.getElementById('fileIncludeFilterInput');
+            const fileExcludeFilterInput = document.getElementById('fileExcludeFilterInput');
             const selectAllFilteredBtn = document.getElementById('selectAllFilteredBtn');
             const deselectAllFilteredBtn = document.getElementById('deselectAllFilteredBtn');
 
@@ -484,7 +491,9 @@
                 deletePresetBtn.addEventListener('click', deletePreset);
                 combineButton.addEventListener('click', combineFiles);
                 themeToggle.addEventListener('click', toggleTheme);
-                fileFilterInput.addEventListener('input', updateFileList);
+                
+                fileIncludeFilterInput.addEventListener('input', updateFileList);
+                fileExcludeFilterInput.addEventListener('input', updateFileList);
 
                 selectAllFilteredBtn.addEventListener('click', selectAllFiltered);
                 deselectAllFilteredBtn.addEventListener('click', deselectAllFiltered);
@@ -610,13 +619,20 @@
 
             function updateFileList() {
                 fileList.innerHTML = '';
-                const filterText = fileFilterInput.value.toLowerCase().trim();
+                const includeFilter = fileIncludeFilterInput.value.toLowerCase().trim();
+                const excludeFilter = fileExcludeFilterInput.value.toLowerCase().trim();
 
-                // Фильтрация по имени или пути файла
-                const filteredFiles = files.filter(fileObj => {
-                    return filterText === '' 
-                        || fileObj.path.toLowerCase().includes(filterText);
-                });
+                let filteredFiles = files;
+
+                // Фильтрация по включающей строке (если есть)
+                if (includeFilter !== '') {
+                    filteredFiles = filteredFiles.filter(fileObj => fileObj.path.toLowerCase().includes(includeFilter));
+                }
+
+                // Фильтрация по исключающей строке (если есть)
+                if (excludeFilter !== '') {
+                    filteredFiles = filteredFiles.filter(fileObj => !fileObj.path.toLowerCase().includes(excludeFilter));
+                }
 
                 filteredFiles.forEach((fileObj) => {
                     const fileItem = document.createElement('div');
@@ -861,9 +877,21 @@
             }
 
             function selectAllFiltered() {
-                const filterText = fileFilterInput.value.toLowerCase().trim();
+                const includeFilter = fileIncludeFilterInput.value.toLowerCase().trim();
+                const excludeFilter = fileExcludeFilterInput.value.toLowerCase().trim();
+
                 files.forEach(fileObj => {
-                    if (filterText === '' || fileObj.path.toLowerCase().includes(filterText)) {
+                    let includeCondition = true;
+                    let excludeCondition = false;
+
+                    if (includeFilter !== '') {
+                        includeCondition = fileObj.path.toLowerCase().includes(includeFilter);
+                    }
+                    if (excludeFilter !== '') {
+                        excludeCondition = fileObj.path.toLowerCase().includes(excludeFilter);
+                    }
+
+                    if (includeCondition && !excludeCondition) {
                         fileObj.selected = true;
                     }
                 });
@@ -871,9 +899,21 @@
             }
 
             function deselectAllFiltered() {
-                const filterText = fileFilterInput.value.toLowerCase().trim();
+                const includeFilter = fileIncludeFilterInput.value.toLowerCase().trim();
+                const excludeFilter = fileExcludeFilterInput.value.toLowerCase().trim();
+
                 files.forEach(fileObj => {
-                    if (filterText === '' || fileObj.path.toLowerCase().includes(filterText)) {
+                    let includeCondition = true;
+                    let excludeCondition = false;
+
+                    if (includeFilter !== '') {
+                        includeCondition = fileObj.path.toLowerCase().includes(includeFilter);
+                    }
+                    if (excludeFilter !== '') {
+                        excludeCondition = fileObj.path.toLowerCase().includes(excludeFilter);
+                    }
+
+                    if (includeCondition && !excludeCondition) {
                         fileObj.selected = false;
                     }
                 });
