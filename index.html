@@ -3,358 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Объединитель файлов</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         :root {
-			--primary-color: #4a90e2;
-			--secondary-color: #f5a623;
-			--background-color: #f0f4f8;
-			--text-color: #333;
-			--border-color: #ddd;
-			--hover-color: #e8f0fe;
-			--danger-color: #e74c3c;
-			--success-color: #2ecc71;
-			--font-family: 'Roboto', sans-serif;
-		}
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --background-color: #f0f4f8;
+            --text-color: #333;
+            --border-color: #ddd;
+            --hover-color: #e8f0fe;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --font-family: 'Roboto', sans-serif;
+        }
 
-		body {
-			font-family: var(--font-family);
-			background-color: var(--background-color);
-			color: var(--text-color);
-			margin: 0;
-			padding: 20px;
-			transition: background-color 0.3s, color 0.3s;
-			display: flex;
-			justify-content: center;
-			align-items: flex-start;
-			min-height: 100vh;
-		}
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
 
-		.container {
-			max-width: 900px;
-			width: 100%;
-			background-color: #fff;
-			padding: 30px 40px;
-			border-radius: 10px;
-			box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-			transition: background-color 0.3s;
-		}
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
 
-		h1 {
-			text-align: center;
-			color: var(--primary-color);
-			margin-bottom: 40px;
-			font-weight: 500;
-		}
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
 
-		.section {
-			margin-bottom: 30px;
-		}
+        .section {
+            margin-bottom: 30px;
+        }
 
-		.section-title {
-			font-size: 1.4em;
-			color: var(--primary-color);
-			margin-bottom: 20px;
-			border-bottom: 2px solid var(--border-color);
-			padding-bottom: 10px;
-		}
+        .section-title {
+            font-size: 1.4em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
 
-		#drop-area {
-			border: 2px dashed var(--primary-color);
-			border-radius: 10px;
-			padding: 40px;
-			text-align: center;
-			cursor: pointer;
-			transition: background-color 0.3s ease, border-color 0.3s ease;
-			background-color: #fff;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-		}
+        #drop-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-		#drop-area:hover, #drop-area.highlight {
-			background-color: var(--hover-color);
-		}
+        #drop-area:hover, #drop-area.highlight {
+            background-color: var(--hover-color);
+        }
 
-		#file-list {
-			margin-top: 20px;
-			max-height: 400px;
-			overflow-y: auto;
-			border: 1px solid var(--border-color);
-			border-radius: 8px;
-		}
+        #file-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
 
-		.file-item {
-			display: flex;
-			align-items: center;
-			padding: 15px 20px;
-			border-bottom: 1px solid var(--border-color);
-			transition: background-color 0.2s ease;
-		}
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
 
-		.file-item:hover {
-			background-color: var(--hover-color);
-		}
+        .file-item:hover {
+            background-color: var(--hover-color);
+        }
 
-		.file-item:last-child {
-			border-bottom: none;
-		}
+        .file-item:last-child {
+            border-bottom: none;
+        }
 
-		.file-info {
-			flex-grow: 1;
-			display: flex;
-			flex-direction: column;
-			cursor: pointer;
-		}
+        .file-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
 
-		.file-name {
-			font-weight: 500;
-			margin-bottom: 5px;
-		}
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
 
-		.file-size {
-			color: #888;
-			font-size: 0.9em;
-		}
+        .file-size {
+            color: #888;
+            font-size: 0.9em;
+        }
 
-		.file-actions {
-			display: flex;
-			align-items: center;
-		}
+        .file-actions {
+            display: flex;
+            align-items: center;
+        }
 
-		.file-actions input[type="checkbox"] {
-			margin-right: 15px;
-			transform: scale(1.2);
-		}
+        .file-actions input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
 
-		.file-actions .delete-icon {
-			color: var(--danger-color);
-			cursor: pointer;
-			font-size: 1.2em;
-			transition: color 0.2s ease;
-		}
+        .file-actions .delete-icon {
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.2s ease;
+        }
 
-		.file-actions .delete-icon:hover {
-			color: #c0392b;
-		}
+        .file-actions .delete-icon:hover {
+            color: #c0392b;
+        }
 
-		input[type="text"], input[type="number"], select {
-			width: 100%;
-			padding: 12px 15px;
-			margin-bottom: 15px;
-			border: 1px solid var(--border-color);
-			border-radius: 6px;
-			font-size: 16px;
-			transition: border-color 0.2s ease;
-			background-color: #fff;
-			color: var(--text-color);
-		}
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+            background-color: #fff;
+            color: var(--text-color);
+        }
 
-		input[type="text"]:focus, input[type="number"]:focus, select:focus {
-			border-color: var(--primary-color);
-			outline: none;
-		}
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
 
-		button {
-			background-color: var(--primary-color);
-			color: #fff;
-			border: none;
-			padding: 12px 25px;
-			border-radius: 6px;
-			cursor: pointer;
-			font-size: 16px;
-			transition: background-color 0.3s ease;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-		}
+        button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-		button:hover {
-			background-color: #357abd;
-		}
+        button:hover {
+            background-color: #357abd;
+        }
 
-		.button-group {
-			display: flex;
-			justify-content: space-between;
-			margin-top: 30px;
-		}
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
 
-		.button-group button {
-			flex: 1;
-			margin: 0 10px;
-		}
+        .button-group button {
+            flex: 1;
+            margin: 0 10px;
+        }
 
-		#clearButton, #deletePresetBtn {
-			background-color: var(--danger-color);
-		}
+        #clearButton, #deletePresetBtn {
+            background-color: var(--danger-color);
+        }
 
-		#clearButton:hover, #deletePresetBtn:hover {
-			background-color: #c0392b;
-		}
+        #clearButton:hover, #deletePresetBtn:hover {
+            background-color: #c0392b;
+        }
 
-		.preset-controls {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 15px;
-		}
+        .preset-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-		.preset-controls > * {
-			flex: 1 1 calc(50% - 15px);
-		}
+        .preset-controls > * {
+            flex: 1 1 calc(50% - 15px);
+        }
 
-		@media (max-width: 600px) {
-			.preset-controls > * {
-				flex: 1 1 100%;
-			}
-		}
+        @media (max-width: 600px) {
+            .preset-controls > * {
+                flex: 1 1 100%;
+            }
+        }
 
-		.fas, .far, .fab {
-			margin-right: 5px;
-		}
+        .fas, .far, .fab {
+            margin-right: 5px;
+        }
 
-		/* Dark mode styles */
-		.dark-mode {
-			--background-color: #1e1e1e;
-			--text-color: #f0f0f0;
-			--border-color: #444;
-			--hover-color: #333;
-		}
+        /* Dark mode styles */
+        .dark-mode {
+            --background-color: #1e1e1e;
+            --text-color: #f0f0f0;
+            --border-color: #444;
+            --hover-color: #333;
+        }
 
-		.dark-mode .container {
-			background-color: #2a2a2a;
-		}
+        .dark-mode .container {
+            background-color: #2a2a2a;
+        }
 
-		.dark-mode #drop-area {
-			background-color: #2a2a2a;
-		}
+        .dark-mode #drop-area {
+            background-color: #2a2a2a;
+        }
 
-		.dark-mode input[type="text"],
-		.dark-mode input[type="number"],
-		.dark-mode select {
-			background-color: #333;
-			color: #f0f0f0;
-			border-color: #555;
-		}
+        .dark-mode input[type="text"],
+        .dark-mode input[type="number"],
+        .dark-mode select {
+            background-color: #333;
+            color: #f0f0f0;
+            border-color: #555;
+        }
 
-		/* Theme toggle */
-		.theme-toggle {
-			position: fixed;
-			top: 20px;
-			right: 30px;
-			cursor: pointer;
-			font-size: 1.5em;
-			color: var(--primary-color);
-			transition: color 0.3s ease;
-			z-index: 1000;
-		}
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: var(--primary-color);
+            transition: color 0.3s ease;
+            z-index: 1000;
+        }
 
-		.theme-toggle:hover {
-			color: #357abd;
-		}
+        .theme-toggle:hover {
+            color: #357abd;
+        }
 
-		/* Collapsible sections */
-		.collapsible {
-			background-color: var(--primary-color);
-			color: white;
-			cursor: pointer;
-			padding: 18px;
-			width: 100%;
-			border: none;
-			text-align: left;
-			outline: none;
-			font-size: 15px;
-			transition: 0.4s;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			border-radius: 5px;
-			margin-bottom: 10px;
-		}
+        /* Collapsible sections */
+        .collapsible {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            transition: 0.4s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
 
-		.active, .collapsible:hover {
-			background-color: #357abd;
-		}
+        .active, .collapsible:hover {
+            background-color: #357abd;
+        }
 
-		.collapsible:after {
-			content: '\002B';
-			color: white;
-			font-weight: bold;
-			float: right;
-			margin-left: 5px;
-		}
+        .collapsible:after {
+            content: '\002B';
+            color: white;
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
 
-		.active:after {
-			content: "\2212";
-		}
+        .active:after {
+            content: "\2212";
+        }
 
-		.collapsible-content {
-			padding: 0 18px;
-			max-height: 0;
-			overflow: hidden;
-			transition: max-height 0.2s ease-out;
-			background-color: #f1f1f1;
-			border-radius: 0 0 5px 5px;
-		}
+        .collapsible-content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: #f1f1f1;
+            border-radius: 0 0 5px 5px;
+        }
 
-		.dark-mode .collapsible-content {
-			background-color: #333;
-		}
+        .dark-mode .collapsible-content {
+            background-color: #333;
+        }
 
-		/* Modal styles */
-		.modal {
-			display: none;
-			position: fixed;
-			z-index: 1000;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%;
-			overflow: auto;
-			background-color: rgba(0,0,0,0.4);
-			display: flex;
-			justify-content: center;
-			align-items: center;
-		}
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-		.modal-content {
-			background-color: #fefefe;
-			padding: 20px;
-			border: 1px solid #888;
-			width: 80%;
-			max-width: 600px;
-			border-radius: 10px;
-			position: relative;
-		}
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+        }
 
-		.dark-mode .modal-content {
-			background-color: #2a2a2a;
-			color: #f0f0f0;
-		}
+        .dark-mode .modal-content {
+            background-color: #2a2a2a;
+            color: #f0f0f0;
+        }
 
-		.close-button {
-			color: #aaa;
-			font-size: 28px;
-			font-weight: bold;
-			cursor: pointer;
-			position: absolute;
-			top: 10px;
-			right: 15px;
-		}
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
 
-		.close-button:hover,
-		.close-button:focus {
-			color: #000;
-			text-decoration: none;
-			cursor: pointer;
-		}
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
 
-		.dark-mode .close-button:hover,
-		.dark-mode .close-button:focus {
-			color: #fff;
-		}
+        .dark-mode .close-button:hover,
+        .dark-mode .close-button:focus {
+            color: #fff;
+        }
+
+        /* Новые элементы для фильтра */
+        #fileFilterInput {
+            margin-bottom: 10px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -399,6 +410,11 @@
                 <p style="font-size: 1.2em;">Перетащите файлы или папки сюда или нажмите для выбора</p>
                 <input type="file" id="fileInput" multiple webkitdirectory hidden>
             </div>
+            <input type="text" id="fileFilterInput" placeholder="Поиск по имени или пути файла (без учета регистра)">
+            <div class="filter-actions">
+                <button id="selectAllFilteredBtn">Отметить все отфильтрованные</button>
+                <button id="deselectAllFilteredBtn">Снять отметки со всех отфильтрованных</button>
+            </div>
             <div id="file-list"></div>
         </div>
 
@@ -428,6 +444,9 @@
             const loadPresetBtn = document.getElementById('loadPresetBtn');
             const deletePresetBtn = document.getElementById('deletePresetBtn');
             const themeToggle = document.getElementById('themeToggle');
+            const fileFilterInput = document.getElementById('fileFilterInput');
+            const selectAllFilteredBtn = document.getElementById('selectAllFilteredBtn');
+            const deselectAllFilteredBtn = document.getElementById('deselectAllFilteredBtn');
 
             // Переменные
             let files = [];
@@ -440,7 +459,6 @@
                 initCollapsibles();
             });
 
-            // Функции инициализации событий
             function initEventListeners() {
                 // Предотвращение поведения по умолчанию для событий перетаскивания
                 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -466,8 +484,11 @@
                 deletePresetBtn.addEventListener('click', deletePreset);
                 combineButton.addEventListener('click', combineFiles);
                 themeToggle.addEventListener('click', toggleTheme);
-				
-				// Добавляем обработчики для сворачиваемых секций
+                fileFilterInput.addEventListener('input', updateFileList);
+
+                selectAllFilteredBtn.addEventListener('click', selectAllFiltered);
+                deselectAllFilteredBtn.addEventListener('click', deselectAllFiltered);
+
                 const collapsibles = document.getElementsByClassName("collapsible");
                 for (let i = 0; i < collapsibles.length; i++) {
                     collapsibles[i].addEventListener("click", function() {
@@ -481,8 +502,7 @@
                     });
                 }
             }
-			
-			// Инициализация сворачиваемых секций
+
             function initCollapsibles() {
                 const collapsibles = document.getElementsByClassName("collapsible");
                 for (let i = 0; i < collapsibles.length; i++) {
@@ -490,13 +510,11 @@
                 }
             }
 
-            // Предотвращение поведения по умолчанию
             function preventDefaults(e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
 
-            // Подсветка области
             function highlight() {
                 dropArea.classList.add('highlight');
             }
@@ -505,7 +523,6 @@
                 dropArea.classList.remove('highlight');
             }
 
-            // Получение настроек фильтрации
             function getFilters() {
                 const includeExtensions = parseExtensions(includeExtensionsInput.value);
                 const excludeExtensions = parseExtensions(excludeExtensionsInput.value);
@@ -514,12 +531,10 @@
                 return { includeExtensions, excludeExtensions, maxFileSize };
             }
 
-            // Парсинг расширений
             function parseExtensions(value) {
                 return value.split(',').map(ext => ext.trim().toLowerCase()).filter(Boolean);
             }
 
-            // Проверка, следует ли включать файл
             function shouldIncludeFile(file) {
                 const { includeExtensions, excludeExtensions, maxFileSize } = getFilters();
                 const fileExtension = getFileExtension(file.name);
@@ -532,12 +547,10 @@
                 return true;
             }
 
-            // Получение расширения файла
             function getFileExtension(filename) {
                 return filename.split('.').pop().toLowerCase();
             }
 
-            // Обработка перетаскивания файлов
             async function handleDrop(e) {
                 const items = e.dataTransfer.items;
                 for (const item of items) {
@@ -551,7 +564,6 @@
                 updateFileList();
             }
 
-            // Обработка выбранных файлов
             async function handleFiles(e) {
                 const selectedFiles = e.target.files;
                 for (const file of selectedFiles) {
@@ -563,7 +575,6 @@
                 updateFileList();
             }
 
-            // Рекурсивный обход файловой системы
             async function traverseFileTree(item, path = '') {
                 if (item.isFile) {
                     const file = await new Promise(resolve => item.file(resolve));
@@ -580,7 +591,6 @@
                 }
             }
 
-            // Чтение всех записей каталога
             function readAllEntries(dirReader) {
                 const entries = [];
                 return new Promise(resolve => {
@@ -598,10 +608,17 @@
                 });
             }
 
-            // Обновление списка файлов
             function updateFileList() {
                 fileList.innerHTML = '';
-                files.forEach((fileObj, index) => {
+                const filterText = fileFilterInput.value.toLowerCase().trim();
+
+                // Фильтрация по имени или пути файла
+                const filteredFiles = files.filter(fileObj => {
+                    return filterText === '' 
+                        || fileObj.path.toLowerCase().includes(filterText);
+                });
+
+                filteredFiles.forEach((fileObj) => {
                     const fileItem = document.createElement('div');
                     fileItem.className = 'file-item';
                     fileItem.draggable = true;
@@ -625,14 +642,17 @@
                     checkbox.type = 'checkbox';
                     checkbox.checked = fileObj.selected;
                     checkbox.addEventListener('change', () => {
-                        files[index].selected = checkbox.checked;
+                        fileObj.selected = checkbox.checked;
                     });
 
                     const deleteIcon = document.createElement('i');
                     deleteIcon.className = 'fas fa-trash-alt delete-icon';
                     deleteIcon.addEventListener('click', () => {
-                        files.splice(index, 1);
-                        updateFileList();
+                        const index = files.indexOf(fileObj);
+                        if (index > -1) {
+                            files.splice(index, 1);
+                            updateFileList();
+                        }
                     });
 
                     fileInfo.appendChild(fileNameSpan);
@@ -646,7 +666,7 @@
 
                     // События для перетаскивания файлов в списке
                     fileItem.addEventListener('dragstart', e => {
-                        e.dataTransfer.setData('text/plain', index);
+                        e.dataTransfer.setData('text/plain', files.indexOf(fileObj));
                     });
 
                     fileItem.addEventListener('dragover', e => {
@@ -660,8 +680,8 @@
 
                     fileItem.addEventListener('drop', e => {
                         e.preventDefault();
-                        const draggedIndex = e.dataTransfer.getData('text/plain');
-                        const targetIndex = index;
+                        const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                        const targetIndex = files.indexOf(fileObj);
                         swapFiles(draggedIndex, targetIndex);
                         fileItem.style.backgroundColor = '';
                     });
@@ -670,7 +690,6 @@
                 });
             }
 
-            // Функция для обмена местами файлов в массиве
             function swapFiles(fromIndex, toIndex) {
                 const temp = files[fromIndex];
                 files[fromIndex] = files[toIndex];
@@ -678,7 +697,6 @@
                 updateFileList();
             }
 
-            // Предварительный просмотр содержимого файла
             async function previewFileContent(fileObj) {
                 const content = await readFile(fileObj.file);
                 const modal = document.createElement('div');
@@ -703,13 +721,11 @@
                 document.body.appendChild(modal);
             }
 
-            // Очистка списка файлов
             function clearFileList() {
                 files = [];
                 updateFileList();
             }
 
-            // Сохранение пресета
             function savePreset() {
                 const presetName = presetNameInput.value.trim();
                 if (!presetName) {
@@ -731,7 +747,6 @@
                 alert('Пресет сохранен');
             }
 
-            // Загрузка пресета
             function loadPreset() {
                 const selectedPreset = presetSelect.value;
                 if (!selectedPreset) {
@@ -750,7 +765,6 @@
                 }
             }
 
-            // Удаление пресета
             function deletePreset() {
                 const selectedPreset = presetSelect.value;
                 if (!selectedPreset) {
@@ -766,7 +780,6 @@
                 alert('Пресет удален');
             }
 
-            // Загрузка списка пресетов
             function loadPresets() {
                 const presets = JSON.parse(localStorage.getItem('filePresets')) || {};
                 presetSelect.innerHTML = '<option value="">Выберите пресет</option>';
@@ -779,7 +792,6 @@
                 }
             }
 
-            // Объединение файлов
             async function combineFiles() {
                 const selectedFiles = files.filter(f => f.selected);
                 if (selectedFiles.length === 0) {
@@ -800,19 +812,16 @@
                 downloadCombinedFile(combinedContent, outputFileName);
             }
 
-            // Генерация имени выходного файла
             function generateOutputFileName(fileNames) {
                 const baseName = 'combined_files';
                 const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
                 return `${baseName}_${timestamp}.txt`;
             }
 
-            // Получение базового имени файла
             function getBaseFileName(filename) {
                 return filename.split('.').slice(0, -1).join('.');
             }
 
-            // Чтение файла
             function readFile(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -822,7 +831,6 @@
                 });
             }
 
-            // Скачивание объединенного файла
             function downloadCombinedFile(content, fileName) {
                 const blob = new Blob([content], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
@@ -835,7 +843,6 @@
                 URL.revokeObjectURL(url);
             }
 
-            // Переключение темы
             function toggleTheme() {
                 document.body.classList.toggle('dark-mode');
                 const isDarkMode = document.body.classList.contains('dark-mode');
@@ -843,7 +850,6 @@
                 themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
             }
 
-            // Загрузка темы из localStorage
             function loadTheme() {
                 const theme = localStorage.getItem('theme') || 'light';
                 if (theme === 'dark') {
@@ -852,6 +858,26 @@
                 } else {
                     themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
                 }
+            }
+
+            function selectAllFiltered() {
+                const filterText = fileFilterInput.value.toLowerCase().trim();
+                files.forEach(fileObj => {
+                    if (filterText === '' || fileObj.path.toLowerCase().includes(filterText)) {
+                        fileObj.selected = true;
+                    }
+                });
+                updateFileList();
+            }
+
+            function deselectAllFiltered() {
+                const filterText = fileFilterInput.value.toLowerCase().trim();
+                files.forEach(fileObj => {
+                    if (filterText === '' || fileObj.path.toLowerCase().includes(filterText)) {
+                        fileObj.selected = false;
+                    }
+                });
+                updateFileList();
             }
         })();
     </script>
