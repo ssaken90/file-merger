@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Объединитель файлов</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         :root {
@@ -239,7 +239,6 @@
             border-color: #555;
         }
 
-        /* Theme toggle */
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -255,7 +254,6 @@
             color: #357abd;
         }
 
-        /* Collapsible sections */
         .collapsible {
             background-color: var(--primary-color);
             color: white;
@@ -303,7 +301,6 @@
             background-color: #333;
         }
 
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -356,7 +353,6 @@
             color: #fff;
         }
 
-        /* Новые элементы для двойной фильтрации */
         .filter-section {
             margin-top: 20px;
         }
@@ -412,8 +408,8 @@
             </div>
             
             <div class="filter-section">
-                <input type="text" id="fileIncludeFilterInput" placeholder="Включать по имени или пути файла (без учета регистра)">
-                <input type="text" id="fileExcludeFilterInput" placeholder="Исключать по имени или пути файла (без учета регистра)">
+                <input type="text" id="fileIncludeFilterInput" placeholder="Включать по имени или пути (несколько слов через запятую)">
+                <input type="text" id="fileExcludeFilterInput" placeholder="Исключать по имени или пути (несколько слов через запятую)">
 
                 <div class="filter-actions">
                     <button id="selectAllFilteredBtn">Отметить все отфильтрованные</button>
@@ -617,21 +613,32 @@
                 });
             }
 
+            function parseFilterTerms(value) {
+                return value.split(',').map(term => term.trim().toLowerCase()).filter(Boolean);
+            }
+
             function updateFileList() {
                 fileList.innerHTML = '';
-                const includeFilter = fileIncludeFilterInput.value.toLowerCase().trim();
-                const excludeFilter = fileExcludeFilterInput.value.toLowerCase().trim();
+                
+                const includeTerms = parseFilterTerms(fileIncludeFilterInput.value);
+                const excludeTerms = parseFilterTerms(fileExcludeFilterInput.value);
 
                 let filteredFiles = files;
 
-                // Фильтрация по включающей строке (если есть)
-                if (includeFilter !== '') {
-                    filteredFiles = filteredFiles.filter(fileObj => fileObj.path.toLowerCase().includes(includeFilter));
+                // Фильтрация по включающим словам (если есть). Логика: файл должен содержать хотя бы одно слово из includeTerms, если includeTerms не пустой
+                if (includeTerms.length > 0) {
+                    filteredFiles = filteredFiles.filter(fileObj => {
+                        const p = fileObj.path.toLowerCase();
+                        return includeTerms.some(term => p.includes(term));
+                    });
                 }
 
-                // Фильтрация по исключающей строке (если есть)
-                if (excludeFilter !== '') {
-                    filteredFiles = filteredFiles.filter(fileObj => !fileObj.path.toLowerCase().includes(excludeFilter));
+                // Фильтрация по исключающим словам (если есть). Файл исключается, если содержит хотя бы одно слово из excludeTerms
+                if (excludeTerms.length > 0) {
+                    filteredFiles = filteredFiles.filter(fileObj => {
+                        const p = fileObj.path.toLowerCase();
+                        return !excludeTerms.some(term => p.includes(term));
+                    });
                 }
 
                 filteredFiles.forEach((fileObj) => {
@@ -877,21 +884,12 @@
             }
 
             function selectAllFiltered() {
-                const includeFilter = fileIncludeFilterInput.value.toLowerCase().trim();
-                const excludeFilter = fileExcludeFilterInput.value.toLowerCase().trim();
+                const includeTerms = parseFilterTerms(fileIncludeFilterInput.value);
+                const excludeTerms = parseFilterTerms(fileExcludeFilterInput.value);
 
                 files.forEach(fileObj => {
-                    let includeCondition = true;
-                    let excludeCondition = false;
-
-                    if (includeFilter !== '') {
-                        includeCondition = fileObj.path.toLowerCase().includes(includeFilter);
-                    }
-                    if (excludeFilter !== '') {
-                        excludeCondition = fileObj.path.toLowerCase().includes(excludeFilter);
-                    }
-
-                    if (includeCondition && !excludeCondition) {
+                    // Проверяем соответствует ли файл текущим фильтрам
+                    if (matchesFilters(fileObj, includeTerms, excludeTerms)) {
                         fileObj.selected = true;
                     }
                 });
@@ -899,25 +897,29 @@
             }
 
             function deselectAllFiltered() {
-                const includeFilter = fileIncludeFilterInput.value.toLowerCase().trim();
-                const excludeFilter = fileExcludeFilterInput.value.toLowerCase().trim();
+                const includeTerms = parseFilterTerms(fileIncludeFilterInput.value);
+                const excludeTerms = parseFilterTerms(fileExcludeFilterInput.value);
 
                 files.forEach(fileObj => {
-                    let includeCondition = true;
-                    let excludeCondition = false;
-
-                    if (includeFilter !== '') {
-                        includeCondition = fileObj.path.toLowerCase().includes(includeFilter);
-                    }
-                    if (excludeFilter !== '') {
-                        excludeCondition = fileObj.path.toLowerCase().includes(excludeFilter);
-                    }
-
-                    if (includeCondition && !excludeCondition) {
+                    // Проверяем соответствует ли файл текущим фильтрам
+                    if (matchesFilters(fileObj, includeTerms, excludeTerms)) {
                         fileObj.selected = false;
                     }
                 });
                 updateFileList();
+            }
+
+            function matchesFilters(fileObj, includeTerms, excludeTerms) {
+                const p = fileObj.path.toLowerCase();
+                // Проверка includeTerms
+                if (includeTerms.length > 0 && !includeTerms.some(term => p.includes(term))) {
+                    return false;
+                }
+                // Проверка excludeTerms
+                if (excludeTerms.length > 0 && excludeTerms.some(term => p.includes(term))) {
+                    return false;
+                }
+                return true;
             }
         })();
     </script>
