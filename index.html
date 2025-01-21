@@ -424,6 +424,7 @@
         <div class="button-group">
             <button id="combineButton"><i class="fas fa-file-medical"></i> Объединить файлы</button>
             <button id="clearButton"><i class="fas fa-eraser"></i> Очистить список</button>
+            <button id="sortButton"><i class="fas fa-sort-amount-down"></i> Сортировать по размеру</button>
         </div>
     </div>
 
@@ -450,6 +451,7 @@
             const fileExcludeFilterInput = document.getElementById('fileExcludeFilterInput');
             const selectAllFilteredBtn = document.getElementById('selectAllFilteredBtn');
             const deselectAllFilteredBtn = document.getElementById('deselectAllFilteredBtn');
+            const sortButton = document.getElementById('sortButton');
 
             // Переменные
             let files = [];
@@ -493,6 +495,8 @@
 
                 selectAllFilteredBtn.addEventListener('click', selectAllFiltered);
                 deselectAllFilteredBtn.addEventListener('click', deselectAllFiltered);
+
+                sortButton.addEventListener('click', sortFilesBySize);
 
                 const collapsibles = document.getElementsByClassName("collapsible");
                 for (let i = 0; i < collapsibles.length; i++) {
@@ -920,6 +924,11 @@
                     return false;
                 }
                 return true;
+            }
+
+            function sortFilesBySize() {
+                files.sort((a, b) => b.file.size - a.file.size);
+                updateFileList();
             }
         })();
     </script>
