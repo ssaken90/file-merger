@@ -561,17 +561,24 @@
             }
 
             async function handleDrop(e) {
-                const items = e.dataTransfer.items;
-                for (const item of items) {
-                    if (item.kind === 'file') {
-                        const entry = item.webkitGetAsEntry();
-                        if (entry) {
-                            await traverseFileTree(entry);
-                        }
-                    }
-                }
-                updateFileList();
-            }
+				const items = e.dataTransfer.items;
+				const entries = [];
+
+				// Собираем все entries из DataTransferItemList
+				for (const item of items) {
+					if (item.kind === 'file') {
+						const entry = item.webkitGetAsEntry();
+						if (entry) entries.push(entry);
+					}
+				}
+
+				// Обрабатываем все entries параллельно
+				await Promise.all(entries.map(entry => 
+					traverseFileTree(entry)
+				));
+				
+				updateFileList();
+			}
 
             async function handleFiles(e) {
                 const selectedFiles = e.target.files;
@@ -584,21 +591,25 @@
                 updateFileList();
             }
 
-            async function traverseFileTree(item, path = '') {
-                if (item.isFile) {
-                    const file = await new Promise(resolve => item.file(resolve));
-                    if (shouldIncludeFile(file)) {
-                        const fullPath = path + file.name;
-                        files.push({ file, path: fullPath, selected: true });
-                    }
-                } else if (item.isDirectory) {
-                    const dirReader = item.createReader();
-                    const entries = await readAllEntries(dirReader);
-                    for (const entry of entries) {
-                        await traverseFileTree(entry, path + item.name + '/');
-                    }
-                }
-            }
+			async function traverseFileTree(item, path = '') {
+				if (item.isFile) {
+					const file = await new Promise(resolve => item.file(resolve));
+					if (shouldIncludeFile(file)) {
+						const fullPath = path + item.name;
+						files.push({ 
+							file, 
+							path: fullPath, 
+							selected: true 
+						});
+					}
+				} else if (item.isDirectory) {
+					const dirReader = item.createReader();
+					const entries = await readAllEntries(dirReader);
+					await Promise.all(entries.map(entry => 
+						traverseFileTree(entry, path + item.name + '/')
+					));
+				}
+			}
 
             function readAllEntries(dirReader) {
                 const entries = [];
